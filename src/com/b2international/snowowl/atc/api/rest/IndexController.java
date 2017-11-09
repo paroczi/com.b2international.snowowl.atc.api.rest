@@ -2,13 +2,11 @@ package com.b2international.snowowl.atc.api.rest;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.SplittableRandom;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import com.b2international.commons.http.AcceptHeader;
@@ -20,15 +18,20 @@ import com.b2international.snowowl.atc.core.request.AtcRequests;
 import com.b2international.snowowl.core.ApplicationContext;
 import com.b2international.snowowl.core.api.IBranchPath;
 import com.b2international.snowowl.core.exceptions.BadRequestException;
-import com.b2international.snowowl.datastore.request.CommitResult;
 import com.b2international.snowowl.eventbus.IEventBus;
+import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
+import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
 
 
 @RestController
 public class IndexController {
 
+	//todo: get user_id from principal.getName()
+	//todo: get branchPath from path
+	
 	private static final String USER_ID = "system";
 	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
+	private static final long COMMIT_TIMEOUT = 120L * 1000L;
 	private IEventBus bus;
 
 	public IndexController() {
@@ -122,16 +125,27 @@ public class IndexController {
 	}
 	
 	@PostMapping("/concepts")
-	public CommitResult createConcept() {
-		try {
-			return AtcRequests.prepareNewConcept()
-			.setId("myid")
-			.setDescription("my description")
-			.setParent("myparent")
-			.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH, USER_ID, "New ATC concept " + "myid")
-			.execute(bus)
-			.getSync();
+	public HttpStatus createConcept(
 			
+			//todo fill AtcConceptRestInput 
+			@RequestBody 
+			final ChangeRequest<AtcConceptRestInput> body) {
+		
+		final AtcConceptRestInput change = body.getChange();
+		final String commitComment = body.getCommitComment();
+		
+		
+		try {
+			
+		final String createdConceptId = change
+				.toRequestBuilder()
+			.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH, USER_ID, commitComment)
+			.execute(bus)
+			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS)
+			.getResultAs(String.class);
+			
+		return HttpStatus.CREATED;
+				
 		} catch (Exception e) {
 			throw new BadRequestException(e.getMessage());
 		}
