@@ -1,29 +1,18 @@
 package com.b2international.snowowl.atc.api.rest;
 
-import java.io.IOException;
 import java.io.StringReader;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.async.DeferredResult;
-
 import com.b2international.commons.http.AcceptHeader;
 import com.b2international.commons.http.ExtendedLocale;
-import com.b2international.snowowl.atc.core.AtcCoreActivator;
 import com.b2international.snowowl.atc.core.domain.AtcConcept;
 import com.b2international.snowowl.atc.core.domain.AtcConcepts;
 import com.b2international.snowowl.atc.core.request.AtcRequests;
-import com.b2international.snowowl.core.ApplicationContext;
-import com.b2international.snowowl.core.api.IBranchPath;
 import com.b2international.snowowl.core.exceptions.BadRequestException;
-import com.b2international.snowowl.eventbus.IEventBus;
 import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
 import com.b2international.snowowl.atc.api.rest.domain.AtcBadRequestException;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
@@ -31,23 +20,17 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
 
 @RestController
-public class AtcConceptRestService {
+public class AtcConceptRestService extends AbstractAtcRestService{
 
 	//todo: get user_id from principal.getName()
-	//todo: get branchPath from path
-	//todo: exception handling
 	
 	private static final String USER_ID = "system";
-	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
-	private static final long COMMIT_TIMEOUT = 120L * 1000L;
-	private IEventBus bus;
 
-	public AtcConceptRestService() {
-		bus = ApplicationContext.getInstance().getService(IEventBus.class);
-	}
-
-	@GetMapping("/concepts")
+	@GetMapping("/{path:**}/concepts")
 	public ResponseEntity<AtcConcepts> search(
+			
+			@PathVariable(value="path")
+			final String branch,
 			
 			@RequestParam(value="id", defaultValue="",required=false)
 			final String idFilter,
@@ -89,7 +72,7 @@ public class AtcConceptRestService {
 					.filterByParents(parents)
 					.setExpand(expand)
 					.setLocales(extendedLocales)
-					.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH)
+					.build(repositoryId, branch)
 					.execute(bus)
 					.getSync()
 					);		
@@ -98,8 +81,12 @@ public class AtcConceptRestService {
 		}
 	}
 	
-	@GetMapping("/concepts/{conceptId}")
+	@GetMapping("/{path:**}/concepts/{conceptId}")
 	public ResponseEntity<AtcConcept> read(
+			
+			@PathVariable(value="path")
+			final String branch,
+			
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			
@@ -117,7 +104,7 @@ public class AtcConceptRestService {
 					AtcRequests.prepareGetConcept(conceptId)
 					.setExpand(expand)
 					.setLocales(extendedLocales)
-					.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH)
+					.build(repositoryId, branch)
 					.execute(bus)
 					.getSync());
 									
@@ -126,8 +113,11 @@ public class AtcConceptRestService {
 		}
 	}
 	
-	@PostMapping("/concepts")
+	@PostMapping("/{path:**}/concepts")
 	public ResponseEntity<Void> create(
+			
+			@PathVariable(value="path")
+			final String branch,
 			
 			@RequestBody 
 			final ChangeRequest<AtcConceptRestInput> body) {
@@ -140,7 +130,7 @@ public class AtcConceptRestService {
 			
 		final String createdConceptId = change
 				.toRequestBuilder()
-			.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH, USER_ID, commitComment)
+			.build(repositoryId, branch, USER_ID, commitComment)
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS)
 			.getResultAs(String.class);
@@ -154,8 +144,12 @@ public class AtcConceptRestService {
 		}
 	}
 
-	@PostMapping("/concepts/{conceptId}")
+	@PostMapping("/{path:**}/concepts/{conceptId}")
 	public  ResponseEntity<Void> update(
+			
+			@PathVariable(value="path")
+			final String branch,
+			
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestBody 
@@ -164,7 +158,7 @@ public class AtcConceptRestService {
 		try {
 			
 	   body.getChange().toRequestBuilder(conceptId)
-			.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH, USER_ID, body.getCommitComment())
+			.build(repositoryId, branch, USER_ID, body.getCommitComment())
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
@@ -175,8 +169,12 @@ public class AtcConceptRestService {
 		}
 	}
 	
-	@DeleteMapping("/concepts/{conceptId}")
+	@DeleteMapping("/{path:**}/concepts/{conceptId}")
 	public ResponseEntity<Void> delete(
+			
+			@PathVariable(value="path")
+			final String branch,
+			
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestParam(defaultValue="false", required=false)
@@ -186,7 +184,7 @@ public class AtcConceptRestService {
 			
 			AtcRequests.prepareDeleteConcept(conceptId)
 			.force(force)
-			.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH, USER_ID,String.format("Deleted Concept '%s' from store.", conceptId))
+			.build(repositoryId, branch, USER_ID,String.format("Deleted Concept '%s' from store.", conceptId))
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
