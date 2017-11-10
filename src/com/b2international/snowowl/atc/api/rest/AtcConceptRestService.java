@@ -10,10 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.b2international.commons.http.AcceptHeader;
 import com.b2international.commons.http.ExtendedLocale;
+import com.b2international.snowowl.atc.core.AtcCoreActivator;
 import com.b2international.snowowl.atc.core.domain.AtcConcept;
 import com.b2international.snowowl.atc.core.domain.AtcConcepts;
 import com.b2international.snowowl.atc.core.request.AtcRequests;
+import com.b2international.snowowl.core.ApplicationContext;
+import com.b2international.snowowl.core.api.IBranchPath;
 import com.b2international.snowowl.core.exceptions.BadRequestException;
+import com.b2international.snowowl.eventbus.IEventBus;
 import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
 import com.b2international.snowowl.atc.api.rest.domain.AtcBadRequestException;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
@@ -21,7 +25,17 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
 
 @RestController
-public class AtcConceptRestService extends AbstractAtcRestService{
+public class AtcConceptRestService{
+
+	//todo: get user_id from principal.getName(), after set principle
+	//todo: exception handling, proper response
+	//todo: parents(),ids() problem
+	//todo: do promise()
+	
+	private static final String USER_ID = "system";
+	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
+	private static final long COMMIT_TIMEOUT = 120L * 1000L;
+	private IEventBus bus = ApplicationContext.getInstance().getService(IEventBus.class);
 
 	@GetMapping("/{path}/concepts")
 	public ResponseEntity<AtcConcepts> search(
@@ -60,6 +74,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 			extendedLocales = AcceptHeader.parseExtendedLocales(new StringReader(acceptLanguage));
 
 			//todo: sortingField
+			//todo: Does expands on act?
 			return ResponseEntity.ok(
 					AtcRequests.prepareSearchConcept()
 					.setLimit(limit)
@@ -69,7 +84,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 					.filterByParents(parents)
 					.setExpand(expand)
 					.setLocales(extendedLocales)
-					.build(repositoryId, branch)
+					.build(REPOSITORY_ID, branch)
 					.execute(bus)
 					.getSync()
 					);		
@@ -101,7 +116,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 					AtcRequests.prepareGetConcept(conceptId)
 					.setExpand(expand)
 					.setLocales(extendedLocales)
-					.build(repositoryId, branch)
+					.build(REPOSITORY_ID, branch)
 					.execute(bus)
 					.getSync());
 									
@@ -122,9 +137,9 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 		
 		try {
 			
-		final String createdConceptId = body.getChange()
-			.toRequestBuilder()
-			.build(repositoryId, branch, principal.getName(),  body.getCommitComment())
+		final String createdConceptId =  body.getChange()
+				.toRequestBuilder()
+			.build(REPOSITORY_ID, branch, USER_ID, body.getCommitComment())
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS)
 			.getResultAs(String.class);
@@ -153,7 +168,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 		try {
 			
 	   body.getChange().toRequestBuilder(conceptId)
-			.build(repositoryId, branch, principal.getName(), body.getCommitComment())
+			.build(REPOSITORY_ID,branch, USER_ID, body.getCommitComment())
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
@@ -180,7 +195,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 			
 			AtcRequests.prepareDeleteConcept(conceptId)
 			.force(force)
-			.build(repositoryId, branch, principal.getName(),String.format("Deleted Concept '%s' from store.", conceptId))
+			.build(REPOSITORY_ID,branch, USER_ID,String.format("Deleted Concept '%s' from store.", conceptId))
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
