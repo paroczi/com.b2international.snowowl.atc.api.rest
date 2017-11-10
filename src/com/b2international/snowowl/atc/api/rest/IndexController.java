@@ -21,6 +21,7 @@ import com.b2international.snowowl.core.exceptions.BadRequestException;
 import com.b2international.snowowl.eventbus.IEventBus;
 import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
+import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
 
 @RestController
@@ -39,7 +40,7 @@ public class IndexController {
 	}
 
 	@GetMapping("/concepts")
-	public AtcConcepts getAllConcepts(
+	public AtcConcepts search(
 			
 			@RequestParam(value="id", defaultValue="",required=false)
 			final String idFilter,
@@ -77,7 +78,7 @@ public class IndexController {
 			throw new BadRequestException(e.getMessage());
 		}
 			
-			//todo: sortingField, and more parentfilter, ids
+			//todo: sortingField
 			return AtcRequests.prepareSearchConcept()
 					.setLimit(limit)
 					.setOffset(offset)
@@ -94,7 +95,7 @@ public class IndexController {
 	}
 	
 	@GetMapping("/concepts/{conceptId}")
-	public AtcConcept getConteptById(
+	public AtcConcept read(
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			
@@ -125,9 +126,8 @@ public class IndexController {
 	}
 	
 	@PostMapping("/concepts")
-	public HttpStatus createConcept(
+	public HttpStatus create(
 			
-			//todo fill AtcConceptRestInput 
 			@RequestBody 
 			final ChangeRequest<AtcConceptRestInput> body) {
 		
@@ -150,6 +150,48 @@ public class IndexController {
 			throw new BadRequestException(e.getMessage());
 		}
 	}
+
+	@PostMapping("/concepts/{conceptId}")
+	public HttpStatus update(
+			@PathVariable(value="conceptId")
+			final String conceptId,
+			@RequestBody 
+			final ChangeRequest<AtcConceptRestUpdate> body) {
+			
+		try {
+			
+	   body.getChange().toRequestBuilder(conceptId)
+			.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH, USER_ID, body.getCommitComment())
+			.execute(bus)
+			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
+			
+		return HttpStatus.OK;
+				
+		} catch (Exception e) {
+			throw new BadRequestException(e.getMessage());
+		}
+	}
 	
+	@DeleteMapping("/concepts/{conceptId}")
+	public HttpStatus delete(
+			@PathVariable(value="conceptId")
+			final String conceptId,
+			@RequestParam(defaultValue="false", required=false)
+			final Boolean force) {
+			
+		try {
+			
+			AtcRequests.prepareDeleteConcept(conceptId)
+			.force(force)
+			.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH, USER_ID,String.format("Deleted Concept '%s' from store.", conceptId))
+			.execute(bus)
+			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
+			
+		return HttpStatus.OK;
+				
+		} catch (Exception e) {
+			throw new BadRequestException(e.getMessage());
+		}
+	}
 	
 }
