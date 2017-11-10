@@ -32,7 +32,8 @@ Bundle-ClassPath: .,
  WEB-INF/lib/spring-web-4.3.12.RELEASE.jar,
  WEB-INF/lib/spring-webmvc-4.3.12.RELEASE.jar,
  WEB-INF/lib/spring-webmvc-portlet-4.3.12.RELEASE.jar,
- WEB-INF/lib/spring-websocket-4.3.12.RELEASE.jar
+ WEB-INF/lib/spring-websocket-4.3.12.RELEASE.jar,
+ WEB-INF/lib/spring-hateoas-0.16.0.RELEASE.jar
 Import-Package: com.b2international.commons,
  com.b2international.commons.collections,
  com.b2international.commons.exceptions,

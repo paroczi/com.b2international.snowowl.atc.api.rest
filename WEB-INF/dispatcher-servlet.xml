@@ -7,6 +7,6 @@
 
     <mvc:annotation-driven/>
   
-  <bean name="restService" class="com.b2international.snowowl.atc.api.rest.IndexController"> </bean>
+  <bean name="restService" class="com.b2international.snowowl.atc.api.rest.AtcConceptRestService"> </bean>
 
 </beans>

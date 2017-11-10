@@ -2,12 +2,17 @@ package com.b2international.snowowl.atc.api.rest;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import com.b2international.commons.http.AcceptHeader;
 import com.b2international.commons.http.ExtendedLocale;
@@ -20,27 +25,29 @@ import com.b2international.snowowl.core.api.IBranchPath;
 import com.b2international.snowowl.core.exceptions.BadRequestException;
 import com.b2international.snowowl.eventbus.IEventBus;
 import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
+import com.b2international.snowowl.atc.api.rest.domain.AtcBadRequestException;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
 
 @RestController
-public class IndexController {
+public class AtcConceptRestService {
 
 	//todo: get user_id from principal.getName()
 	//todo: get branchPath from path
+	//todo: exception handling
 	
 	private static final String USER_ID = "system";
 	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
 	private static final long COMMIT_TIMEOUT = 120L * 1000L;
 	private IEventBus bus;
 
-	public IndexController() {
+	public AtcConceptRestService() {
 		bus = ApplicationContext.getInstance().getService(IEventBus.class);
 	}
 
 	@GetMapping("/concepts")
-	public AtcConcepts search(
+	public ResponseEntity<AtcConcepts> search(
 			
 			@RequestParam(value="id", defaultValue="",required=false)
 			final String idFilter,
@@ -67,19 +74,14 @@ public class IndexController {
 		 List<String> ids;
 		 List<String> parents;
 		
-		
 		try {
 			ids=  Arrays.asList(idFilter.split(","));
 			parents=  Arrays.asList(parentFilter.split(","));
 			extendedLocales = AcceptHeader.parseExtendedLocales(new StringReader(acceptLanguage));
-		} catch (IOException e) {
-			throw new BadRequestException(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			throw new BadRequestException(e.getMessage());
-		}
-			
+
 			//todo: sortingField
-			return AtcRequests.prepareSearchConcept()
+			return ResponseEntity.ok(
+					AtcRequests.prepareSearchConcept()
 					.setLimit(limit)
 					.setOffset(offset)
 //					.filterByIds(ids)  //throwing error, if not there, and not working too
@@ -89,13 +91,15 @@ public class IndexController {
 					.setLocales(extendedLocales)
 					.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH)
 					.execute(bus)
-					.getSync();
-		
-	
+					.getSync()
+					);		
+		} catch (Exception e) {
+			throw new BadRequestException(e.getMessage());
+		}
 	}
 	
 	@GetMapping("/concepts/{conceptId}")
-	public AtcConcept read(
+	public ResponseEntity<AtcConcept> read(
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			
@@ -103,30 +107,27 @@ public class IndexController {
 			final String expand,
 			
 			@RequestHeader(value="Accept-Language", defaultValue="en-US;q=0.8,en-GB;q=0.6", required=false) 
-			final String acceptLanguage
-	) {
+			final String acceptLanguage) {
 
 		final List<ExtendedLocale> extendedLocales;
 		
 		try {
 			extendedLocales = AcceptHeader.parseExtendedLocales(new StringReader(acceptLanguage));
-		} catch (IOException e) {
-			throw new BadRequestException(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			throw new BadRequestException(e.getMessage());
-		}
-		
-			return AtcRequests.prepareGetConcept(conceptId)
+			return ResponseEntity.ok(
+					AtcRequests.prepareGetConcept(conceptId)
 					.setExpand(expand)
 					.setLocales(extendedLocales)
 					.build(REPOSITORY_ID, IBranchPath.MAIN_BRANCH)
 					.execute(bus)
-					.getSync();
-	
+					.getSync());
+									
+		} catch (Exception e) {
+			throw new AtcBadRequestException(e.getMessage());
+		}
 	}
 	
 	@PostMapping("/concepts")
-	public HttpStatus create(
+	public ResponseEntity<HttpStatus> create(
 			
 			@RequestBody 
 			final ChangeRequest<AtcConceptRestInput> body) {
@@ -144,15 +145,15 @@ public class IndexController {
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS)
 			.getResultAs(String.class);
 			
-		return HttpStatus.CREATED;
-				
+		return ResponseEntity.status(201).build();	
+//		linkTo(AtcConceptRestService.class).slash("concepts").slash(createdConceptId).toUri()
 		} catch (Exception e) {
-			throw new BadRequestException(e.getMessage());
+			throw new AtcBadRequestException(e.getMessage());
 		}
 	}
 
 	@PostMapping("/concepts/{conceptId}")
-	public HttpStatus update(
+	public  ResponseEntity<HttpStatus> update(
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestBody 
@@ -165,15 +166,15 @@ public class IndexController {
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
-		return HttpStatus.OK;
+	   return ResponseEntity.status(204).build();
 				
 		} catch (Exception e) {
-			throw new BadRequestException(e.getMessage());
+			throw new AtcBadRequestException(e.getMessage());
 		}
 	}
 	
 	@DeleteMapping("/concepts/{conceptId}")
-	public HttpStatus delete(
+	public ResponseEntity<HttpStatus> delete(
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestParam(defaultValue="false", required=false)
@@ -187,10 +188,10 @@ public class IndexController {
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
-		return HttpStatus.OK;
+			 return ResponseEntity.status(204).build();
 				
 		} catch (Exception e) {
-			throw new BadRequestException(e.getMessage());
+			throw new AtcBadRequestException(e.getMessage());
 		}
 	}
 	
