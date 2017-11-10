@@ -1,6 +1,7 @@
 package com.b2international.snowowl.atc.api.rest;
 
 import java.io.StringReader;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -21,10 +22,6 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
 @RestController
 public class AtcConceptRestService extends AbstractAtcRestService{
-
-	//todo: get user_id from principal.getName()
-	
-	private static final String USER_ID = "system";
 
 	@GetMapping("/{path:**}/concepts")
 	public ResponseEntity<AtcConcepts> search(
@@ -120,23 +117,20 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 			final String branch,
 			
 			@RequestBody 
-			final ChangeRequest<AtcConceptRestInput> body) {
-		
-		final AtcConceptRestInput change = body.getChange();
-		final String commitComment = body.getCommitComment();
-		
+			final ChangeRequest<AtcConceptRestInput> body,
+			final Principal principal) {
 		
 		try {
 			
-		final String createdConceptId = change
-				.toRequestBuilder()
-			.build(repositoryId, branch, USER_ID, commitComment)
+		final String createdConceptId = body.getChange()
+			.toRequestBuilder()
+			.build(repositoryId, branch, principal.getName(),  body.getCommitComment())
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS)
 			.getResultAs(String.class);
 			
 		return ResponseEntity
-				.created(linkTo(AtcConceptRestService.class).slash("concepts").slash(createdConceptId).toUri())
+				.created(linkTo(AtcConceptRestService.class).slash(branch).slash("concepts").slash(createdConceptId).toUri())
 				.build();	
 		
 		} catch (Exception e) {
@@ -153,12 +147,13 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestBody 
-			final ChangeRequest<AtcConceptRestUpdate> body) {
+			final ChangeRequest<AtcConceptRestUpdate> body,
+			final Principal principal) {
 			
 		try {
 			
 	   body.getChange().toRequestBuilder(conceptId)
-			.build(repositoryId, branch, USER_ID, body.getCommitComment())
+			.build(repositoryId, branch, principal.getName(), body.getCommitComment())
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
@@ -178,13 +173,14 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestParam(defaultValue="false", required=false)
-			final Boolean force) {
+			final Boolean force,
+			final Principal principal) {
 			
 		try {
 			
 			AtcRequests.prepareDeleteConcept(conceptId)
 			.force(force)
-			.build(repositoryId, branch, USER_ID,String.format("Deleted Concept '%s' from store.", conceptId))
+			.build(repositoryId, branch, principal.getName(),String.format("Deleted Concept '%s' from store.", conceptId))
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
