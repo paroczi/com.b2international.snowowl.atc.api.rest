@@ -23,7 +23,7 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 @RestController
 public class AtcConceptRestService extends AbstractAtcRestService{
 
-	@GetMapping("/{path:**}/concepts")
+	@GetMapping("/{path}/concepts")
 	public ResponseEntity<AtcConcepts> search(
 			
 			@PathVariable(value="path")
@@ -78,7 +78,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 		}
 	}
 	
-	@GetMapping("/{path:**}/concepts/{conceptId}")
+	@GetMapping("/{path}/concepts/{conceptId}")
 	public ResponseEntity<AtcConcept> read(
 			
 			@PathVariable(value="path")
@@ -110,7 +110,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 		}
 	}
 	
-	@PostMapping("/{path:**}/concepts")
+	@PostMapping("/{path}/concepts")
 	public ResponseEntity<Void> create(
 			
 			@PathVariable(value="path")
@@ -138,7 +138,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 		}
 	}
 
-	@PostMapping("/{path:**}/concepts/{conceptId}")
+	@PostMapping("/{path}/concepts/{conceptId}")
 	public  ResponseEntity<Void> update(
 			
 			@PathVariable(value="path")
@@ -164,7 +164,7 @@ public class AtcConceptRestService extends AbstractAtcRestService{
 		}
 	}
 	
-	@DeleteMapping("/{path:**}/concepts/{conceptId}")
+	@DeleteMapping("/{path}/concepts/{conceptId}")
 	public ResponseEntity<Void> delete(
 			
 			@PathVariable(value="path")
