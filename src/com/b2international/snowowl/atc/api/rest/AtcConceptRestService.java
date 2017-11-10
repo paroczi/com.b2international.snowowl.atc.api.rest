@@ -127,7 +127,7 @@ public class AtcConceptRestService {
 	}
 	
 	@PostMapping("/concepts")
-	public ResponseEntity<HttpStatus> create(
+	public ResponseEntity<Void> create(
 			
 			@RequestBody 
 			final ChangeRequest<AtcConceptRestInput> body) {
@@ -145,15 +145,17 @@ public class AtcConceptRestService {
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS)
 			.getResultAs(String.class);
 			
-		return ResponseEntity.status(201).build();	
-//		linkTo(AtcConceptRestService.class).slash("concepts").slash(createdConceptId).toUri()
+		return ResponseEntity
+				.created(linkTo(AtcConceptRestService.class).slash("concepts").slash(createdConceptId).toUri())
+				.build();	
+		
 		} catch (Exception e) {
 			throw new AtcBadRequestException(e.getMessage());
 		}
 	}
 
 	@PostMapping("/concepts/{conceptId}")
-	public  ResponseEntity<HttpStatus> update(
+	public  ResponseEntity<Void> update(
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestBody 
@@ -174,7 +176,7 @@ public class AtcConceptRestService {
 	}
 	
 	@DeleteMapping("/concepts/{conceptId}")
-	public ResponseEntity<HttpStatus> delete(
+	public ResponseEntity<Void> delete(
 			@PathVariable(value="conceptId")
 			final String conceptId,
 			@RequestParam(defaultValue="false", required=false)
