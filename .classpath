@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/guava-23.4-jre.jar"/>
 	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/spring-hateoas-0.16.0.RELEASE.jar"/>
 	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/aopalliance-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="WEB-INF/lib/commons-logging-1.2.jar"/>

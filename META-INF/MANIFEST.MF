@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Web-ContextPath: /atc/v1
 Bundle-ClassPath: .,
+ WEB-INF/lib/guava-23.4-jre.jar,
  WEB-INF/lib/aopalliance-1.0.jar,
  WEB-INF/lib/commons-logging-1.2.jar,
  WEB-INF/lib/jackson-annotations-2.9.2.jar,
@@ -82,4 +83,5 @@ Import-Package: com.b2international.commons,
  com.b2international.snowowl.eventbus,
  com.b2international.snowowl.terminologyregistry.core.request,
  javax.servlet;version="3.1.0",
- javax.servlet.http;version="3.1.0"
+ javax.servlet.http;version="3.1.0",
+ org.slf4j;version="1.7.2"

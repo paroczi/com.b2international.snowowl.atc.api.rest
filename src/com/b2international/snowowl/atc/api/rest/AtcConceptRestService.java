@@ -1,13 +1,17 @@
 package com.b2international.snowowl.atc.api.rest;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import com.b2international.commons.http.AcceptHeader;
 import com.b2international.commons.http.ExtendedLocale;
 import com.b2international.snowowl.atc.core.AtcCoreActivator;
@@ -15,11 +19,11 @@ import com.b2international.snowowl.atc.core.domain.AtcConcept;
 import com.b2international.snowowl.atc.core.domain.AtcConcepts;
 import com.b2international.snowowl.atc.core.request.AtcRequests;
 import com.b2international.snowowl.core.ApplicationContext;
-import com.b2international.snowowl.core.api.IBranchPath;
 import com.b2international.snowowl.core.exceptions.BadRequestException;
+import com.b2international.snowowl.core.exceptions.NotFoundException;
 import com.b2international.snowowl.eventbus.IEventBus;
 import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
-import com.b2international.snowowl.atc.api.rest.domain.AtcBadRequestException;
+import com.b2international.snowowl.atc.api.rest.domain.RestApiError;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
@@ -28,7 +32,7 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 public class AtcConceptRestService{
 
 	//todo: get user_id from principal.getName(), after set principle
-	//todo: exception handling, proper response
+	//todo: exception handling, global not mapping
 	//todo: parents(),ids() problem
 	//todo: do promise()
 	
@@ -112,6 +116,7 @@ public class AtcConceptRestService{
 		
 		try {
 			extendedLocales = AcceptHeader.parseExtendedLocales(new StringReader(acceptLanguage));
+			
 			return ResponseEntity.ok(
 					AtcRequests.prepareGetConcept(conceptId)
 					.setExpand(expand)
@@ -119,11 +124,25 @@ public class AtcConceptRestService{
 					.build(REPOSITORY_ID, branch)
 					.execute(bus)
 					.getSync());
-									
+					
+			
 		} catch (Exception e) {
-			throw new AtcBadRequestException(e.getMessage());
+			throw new NotFoundException("AtcConcept",conceptId);
 		}
 	}
+	
+	
+	/*
+	 * Exception handler for NotfoundException
+	 * problem:  The global ControllexceptionMapper not mapping this
+	 */
+	@ExceptionHandler
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public @ResponseBody RestApiError handle(final NotFoundException ex) {
+		return RestApiError.of(ex.toApiError()).build(HttpStatus.NOT_FOUND.value());
+	}
+
+
 	
 	@PostMapping("/{path}/concepts")
 	public ResponseEntity<Void> create(
@@ -149,7 +168,7 @@ public class AtcConceptRestService{
 				.build();	
 		
 		} catch (Exception e) {
-			throw new AtcBadRequestException(e.getMessage());
+			throw new BadRequestException(e.getMessage());
 		}
 	}
 
@@ -175,7 +194,7 @@ public class AtcConceptRestService{
 	   return ResponseEntity.status(204).build();
 				
 		} catch (Exception e) {
-			throw new AtcBadRequestException(e.getMessage());
+			throw new BadRequestException(e.getMessage());
 		}
 	}
 	
@@ -202,7 +221,7 @@ public class AtcConceptRestService{
 			 return ResponseEntity.status(204).build();
 				
 		} catch (Exception e) {
-			throw new AtcBadRequestException(e.getMessage());
+			throw new BadRequestException(e.getMessage());
 		}
 	}
 	
