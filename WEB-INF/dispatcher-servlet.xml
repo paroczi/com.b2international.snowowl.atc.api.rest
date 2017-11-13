@@ -13,8 +13,8 @@
 
     <mvc:annotation-driven/>
 	
-  <bean name="restService" class="com.b2international.snowowl.atc.api.rest.AtcConceptRestService"> </bean>
-
+  <bean name="restService" class="com.b2international.snowowl.atc.api.rest.AtcConceptRestService" />
+  <bean name="exceptionMapper" class="com.b2international.snowowl.atc.api.rest.ControllerExceptionMapper" />
 
 
 </beans>
