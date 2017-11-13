@@ -30,9 +30,7 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 @RestController
 public class AtcConceptRestService{
 
-	//todo: get user_id from principal.getName(), after set principle
 	//todo: use promise()
-	//todo: sortingField
 	
 	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
 	private static final long COMMIT_TIMEOUT = 120L * 1000L;
@@ -145,10 +143,9 @@ public class AtcConceptRestService{
 			final ChangeRequest<AtcConceptRestInput> body,
 			final Principal principal) {
 		
-		String user_id = StringUtils.isEmpty(principal)? "system": principal.getName();
 		final String createdConceptId =  body.getChange()
 				.toRequestBuilder()
-			.build(REPOSITORY_ID, branch, user_id, body.getCommitComment())
+			.build(REPOSITORY_ID, branch, principal.getName(), body.getCommitComment())
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS)
 			.getResultAs(String.class);
@@ -172,10 +169,9 @@ public class AtcConceptRestService{
 			final ChangeRequest<AtcConceptRestUpdate> body,
 			final Principal principal) {
 	
-		String user_id = StringUtils.isEmpty(principal)? "system": principal.getName();
 		
 	   body.getChange().toRequestBuilder(conceptId)
-			.build(REPOSITORY_ID,branch, user_id, body.getCommitComment())
+			.build(REPOSITORY_ID,branch, principal.getName(), body.getCommitComment())
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
@@ -196,11 +192,10 @@ public class AtcConceptRestService{
 			final Boolean force,
 			final Principal principal) {
 		
-		String user_id = StringUtils.isEmpty(principal)? "system": principal.getName();
 		
 			AtcRequests.prepareDeleteConcept(conceptId)
 			.force(force)
-			.build(REPOSITORY_ID,branch,user_id,String.format("Deleted Concept '%s' from store.", conceptId))
+			.build(REPOSITORY_ID,branch,principal.getName(),String.format("Deleted Concept '%s' from store.", conceptId))
 			.execute(bus)
 			.getSync(COMMIT_TIMEOUT, TimeUnit.MILLISECONDS);
 			
