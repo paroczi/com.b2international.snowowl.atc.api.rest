@@ -14,25 +14,19 @@
 
 	<global-method-security secured-annotations="enabled"
 		proxy-target-class="true" />
-
-	<authentication-manager>
-
-		<authentication-provider>
-
-			<user-service>
-
-				<user name="snowowl" password="snowowl" authorities="ROLE_USER" />
-
-			</user-service>
-
-		</authentication-provider>
-
-	</authentication-manager>
 <!--
+	<authentication-manager>
+		<authentication-provider>
+			<user-service>
+				<user name="snowowl" password="snowowl" authorities="ROLE_USER" />
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+ -->
 	<authentication-manager>
 		<authentication-provider ref="atcAuthenticationProvider" />
 	</authentication-manager>
- -->
+
 
 	<beans:bean id="atcAuthenticationProvider"
 		class="com.b2international.snowowl.atc.api.rest.AtcAuthenticationProvider" />
