@@ -20,6 +20,7 @@ import com.b2international.snowowl.atc.core.request.AtcConceptSearchRequestBuild
 import com.b2international.snowowl.atc.core.request.AtcRequests;
 import com.b2international.snowowl.core.ApplicationContext;
 import com.b2international.snowowl.core.exceptions.BadRequestException;
+import com.b2international.snowowl.core.request.SearchResourceRequest;
 import com.b2international.snowowl.eventbus.IEventBus;
 import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
@@ -93,7 +94,7 @@ public class AtcConceptRestService{
 				.filterByDescription(descriptionFilter)
 				.setExpand(expand)
 				.setLocales(extendedLocales)
-//				.sortBy(new SortField("id", true))
+				.sortBy(new SearchResourceRequest.SortField("id", true))
 				.build(REPOSITORY_ID, branch)
 				.execute(bus)
 				.getSync());		
