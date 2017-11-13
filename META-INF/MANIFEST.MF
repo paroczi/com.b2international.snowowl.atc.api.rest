@@ -6,7 +6,7 @@ Bundle-Version: 5.0.0.qualifier
 Bundle-Vendor: B2i Healthcare
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Web-ContextPath: /atc/v1
+Web-ContextPath: /snowowl/atc/v1
 Bundle-ClassPath: .,
  WEB-INF/lib/guava-23.4-jre.jar,
  WEB-INF/lib/aopalliance-1.0.jar,
