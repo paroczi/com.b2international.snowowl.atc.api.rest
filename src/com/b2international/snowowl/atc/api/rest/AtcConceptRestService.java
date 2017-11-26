@@ -30,7 +30,6 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 @RestController
 public class AtcConceptRestService{
 
-	//todo: use promise()
 	
 	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
 	private static final long COMMIT_TIMEOUT = 120L * 1000L;
