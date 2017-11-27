@@ -58,8 +58,10 @@ Bundle-ClassPath: .,
  WEB-INF/lib/swagger-springmvc-1.0.2.jar,
  WEB-INF/lib/springfox-bean-validators-2.7.0.jar,
  WEB-INF/lib/springfox-spring-web-2.7.0.jar,
- WEB-INF/lib/springfox-staticdocs-2.6.1.jar,
- WEB-INF/lib/springfox-spi-2.7.0.jar
+ WEB-INF/lib/springfox-spi-2.7.0.jar,
+ WEB-INF/lib/springfox-core-2.7.0.jar,
+ WEB-INF/lib/springfox-schema-2.7.0.jar,
+ WEB-INF/lib/springfox-swagger-common-2.7.0.jar
 Import-Package: com.b2international.commons,
  com.b2international.commons.collections,
  com.b2international.commons.exceptions,
