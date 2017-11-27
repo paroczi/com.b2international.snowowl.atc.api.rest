@@ -37,7 +37,8 @@ import com.b2international.snowowl.atc.api.rest.domain.RestApiError;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
-@Api("ATC Concepts")
+
+@Api(value = "concepts", description = "ATC Concept REST API", tags = { "concepts" })
 @RestController
 public class AtcConceptRestService{
 
@@ -51,7 +52,7 @@ public class AtcConceptRestService{
 			notes="Returns a list with all/filtered Concepts from a branch."
 					+ "<p>The following properties can be expanded:"
 					+ "<p>"
-					+ "&bull; descendants() &ndash; the list of descendants of the concept<br>")
+					+ "&bull; descendants() &ndash; the list of descendants of the concept<br>",tags = { "concepts" })
 	@ApiResponses({
 		@ApiResponse(code = 200, message = "OK", response = PageableCollectionResource.class),
 		@ApiResponse(code = 400, message = "Invalid filter config", response = RestApiError.class),
@@ -157,7 +158,7 @@ public class AtcConceptRestService{
 			notes="Returns all properties of the specified Concept, including a summary of inactivation indicator and association members."
 					+ "<p>The following properties can be expanded:"
 					+ "<p>"
-					+ "&bull; descendants() &ndash; the list of descendants of the concept<br>")
+					+ "&bull; descendants() &ndash; the list of descendants of the concept<br>",tags = { "concepts" })
 	@ApiResponses({
 		@ApiResponse(code = 200, message = "OK", response = Void.class),
 		@ApiResponse(code = 404, message = "Branch or Concept not found", response = RestApiError.class)
@@ -200,7 +201,7 @@ public class AtcConceptRestService{
 	
 	@ApiOperation(
 			value="Create Concept", 
-			notes="Creates a new Concept directly on a branch.")
+			notes="Creates a new Concept directly on a branch.",tags = { "concepts" })
 	@ApiResponses({
 		@ApiResponse(code = 201, message = "Concept created on task"),
 		@ApiResponse(code = 404, message = "Branch not found", response = RestApiError.class)
@@ -237,7 +238,7 @@ public class AtcConceptRestService{
 					+ "membership in case of inactivation."
 					+ "<p>The following properties are allowed to change:"
 					+ "<p>"
-					+ "&bull; definition status<br>")
+					+ "&bull; definition status<br>",tags = { "concepts" })
 	@ApiResponses({
 		@ApiResponse(code = 204, message = "Update successful"),
 		@ApiResponse(code = 404, message = "Branch or Concept not found", response = RestApiError.class)
@@ -275,7 +276,7 @@ public class AtcConceptRestService{
 					+ "status will be returned."
 					+ "<p>The force flag enables the deletion of a released Concept. "
 					+ "Deleting published components is against the RF2 history policy so"
-					+ " this should only be used to remove a new component from a release before the release is published.</p>")
+					+ " this should only be used to remove a new component from a release before the release is published.</p>",tags = { "concepts" })
 	@ApiResponses({
 		@ApiResponse(code = 204, message = "Deletion successful"),
 		@ApiResponse(code = 404, message = "Branch or Concept not found", response = RestApiError.class),
