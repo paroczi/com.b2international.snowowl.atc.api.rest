@@ -59,7 +59,7 @@ public class AtcConceptRestInput{
 	public AtcConceptCreateRequestBuilder toRequestBuilder() {
 		
 		final AtcConceptCreateRequestBuilder req = createRequestBuilder();
-		req.setId(getId());  //todo: handle idnot found excaption
+		req.setId(getId());
 		req.setDescription(getDescription());
 		req.setParent(getParent());
 		return req;

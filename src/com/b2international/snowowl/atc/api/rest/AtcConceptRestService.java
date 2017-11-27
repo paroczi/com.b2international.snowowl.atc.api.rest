@@ -100,7 +100,7 @@ public class AtcConceptRestService{
 		 
 		 if(!StringUtils.isEmpty(parentFilter)) {
 			 List<String> parents = Arrays.asList(parentFilter.split(","));
-			 request = request.filterByIds(parents);
+			 request = request.filterByParents(parents);
 		 }
 		
 		
