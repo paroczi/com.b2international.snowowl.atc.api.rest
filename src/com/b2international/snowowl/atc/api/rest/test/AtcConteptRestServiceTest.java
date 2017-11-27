@@ -29,7 +29,7 @@ public class AtcConteptRestServiceTest {
 	public void test12SearchInvalidFilter() throws UnirestException {
 		HttpResponse<JsonNode> jsonResponse = Unirest.get(baseURL)
 				 .basicAuth("snowowl", "snowowl")
-				 .queryString("sort","apple")
+				 .queryString("limit","aaa")
 				.asJson();
 		assertThat(jsonResponse.getStatus(), equalTo(400));
 	}

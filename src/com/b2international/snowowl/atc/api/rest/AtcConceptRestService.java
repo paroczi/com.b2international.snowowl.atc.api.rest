@@ -38,6 +38,7 @@ import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
 import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
 
+
 @Api(value = "concepts", description = "ATC Concept REST API", tags = { "concepts" })
 @RestController
 public class AtcConceptRestService{
@@ -46,6 +47,11 @@ public class AtcConceptRestService{
 	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
 	private static final long COMMIT_TIMEOUT = 120L * 1000L;
 	private IEventBus bus = ApplicationContext.getInstance().getService(IEventBus.class);
+	
+	public boolean isNumeric(String s) {  
+	    return s != null && s.matches("[-+]?\\d*\\.?\\d+");  
+	}  
+	
 	
 	@ApiOperation(
 			value="Retrieve Concepts from a branch", 
@@ -78,11 +84,11 @@ public class AtcConceptRestService{
 			
 			@ApiParam(value="The starting offset in the list")
 			@RequestParam(value="offset", defaultValue="0", required=false)
-			final int offset,
+			final String offset,
 			
 			@ApiParam(value="The maximum number of items to return")
 			@RequestParam(value="limit", defaultValue="50", required=false)
-			final int limit,
+			final String limit,
 			
 			@ApiParam(value="The list of sorting fields in order and start with (+/-) as orientation"
 					+ "The available sorting parameters: id, iconId, description, parent, released, score, storageKey")
@@ -97,10 +103,16 @@ public class AtcConceptRestService{
 			@RequestHeader(value="Accept-Language", defaultValue="en-US;q=0.8,en-GB;q=0.6", required=false) 
 			final String acceptLanguage) {
 		
+		
+		if(!isNumeric(limit) || !isNumeric(offset)) {
+			throw new IllegalArgumentException();
+		}
+		
 		final List<ExtendedLocale> extendedLocales;
 		 
 		AtcConceptSearchRequestBuilder request = AtcRequests.prepareSearchConcept();
-		 
+		
+	
 		 if(!StringUtils.isEmpty(idFilter)) {
 			 List<String> ids = Arrays.asList(idFilter.split(","));
 			 request = request.filterByIds(ids);
@@ -142,8 +154,8 @@ public class AtcConceptRestService{
 		
 		return ResponseEntity.ok(
 				request
-				.setLimit(limit)
-				.setOffset(offset)
+				.setLimit(Integer.parseInt(limit))
+				.setOffset(Integer.parseInt(offset))
 				.filterByDescription(descriptionFilter)
 				.setExpand(expand)
 				.setLocales(extendedLocales)
