@@ -8,32 +8,35 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.junit.runners.MethodSorters;
+import org.junit.FixMethodOrder;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AtcConteptRestServiceTest {
 
 	String baseURL = "http://localhost:8080/snowowl/atc/v1/MAIN/concepts/";
 
 	@Test()
-
-	public void testSearch() throws UnirestException {
+	public void test11Search() throws UnirestException {
 		HttpResponse<JsonNode> jsonResponse = Unirest.get(baseURL)
 				 .basicAuth("snowowl", "snowowl")
-				 .queryString("sort", "?sort=-id,parent,score")
+				 .queryString("sort", "-id,parent,score")
 				.asJson();
 		assertThat(jsonResponse.getStatus(), equalTo(200));
 	}
 	
-	public void testSearchInvalidFilter() throws UnirestException {
+	@Test()
+	public void test12SearchInvalidFilter() throws UnirestException {
 		HttpResponse<JsonNode> jsonResponse = Unirest.get(baseURL)
 				 .basicAuth("snowowl", "snowowl")
-				 .queryString("apple", "true")
+				 .queryString("sort","apple")
 				.asJson();
 		assertThat(jsonResponse.getStatus(), equalTo(400));
 	}
 	
 
 	@Test()
-	public void testRead() throws UnirestException {
+	public void test21Read() throws UnirestException {
 		HttpResponse<JsonNode> jsonResponse = Unirest.get(baseURL + "{conceptId}")
 				.routeParam("conceptId", "D01A")
 				.queryString("expand","descendants()")
@@ -43,7 +46,7 @@ public class AtcConteptRestServiceTest {
 	}
 	
 	@Test()
-	public void testReadNotFound() throws UnirestException {
+	public void test22ReadNotFound() throws UnirestException {
 		HttpResponse<JsonNode> jsonResponse = Unirest.get(baseURL + "{conceptId}")
 				.routeParam("conceptId", "000")
 				 .basicAuth("snowowl", "snowowl")
@@ -52,7 +55,7 @@ public class AtcConteptRestServiceTest {
 	}
 
 	@Test()
-	public void testCreate() throws UnirestException {
+	public void test31Create() throws UnirestException {
 		 JsonNode newConcept = new JsonNode("{\"id\":\"D01A5\",\"description\":\"Example concept\",\"parent\":\"D01A\",\"commitComment\":\"This is a commit comment\"}");
 		 
 		HttpResponse<JsonNode> jsonResponse = Unirest.post(baseURL)
@@ -64,7 +67,7 @@ public class AtcConteptRestServiceTest {
 	}
 	
 	@Test()
-	public void testCreateConflict() throws UnirestException {
+	public void test32CreateConflict() throws UnirestException {
 		 JsonNode newConcept = new JsonNode("{\"id\":\"D01A5\",\"description\":\"Example concept\",\"parent\":\"D01A\",\"commitComment\":\"This is a commit comment\"}");
 		 
 		HttpResponse<JsonNode> jsonResponse = Unirest.post(baseURL)
@@ -76,11 +79,12 @@ public class AtcConteptRestServiceTest {
 	}
 	
 	@Test()
-	public void testUpdate() throws UnirestException {
+	public void test41Update() throws UnirestException {
 		 JsonNode updateConcept = new JsonNode("{\"description\":\"Updated concept\",\"commitComment\":\"Update description\"}");
 		 
 		HttpResponse<JsonNode> jsonResponse = Unirest.post(baseURL + "{conceptId}")
 				  .basicAuth("snowowl", "snowowl")
+				  .header("Content-Type", "application/json")
 					.routeParam("conceptId", "D01A5")
 	                .body(updateConcept)
 	                .asJson();
@@ -88,11 +92,12 @@ public class AtcConteptRestServiceTest {
 	}
 	
 	@Test()
-	public void testUpdateNotFound() throws UnirestException {
+	public void test42UpdateNotFound() throws UnirestException {
 		 JsonNode updateConcept = new JsonNode("{\"description\":\"Updated concept\",\"commitComment\":\"Update description\"}");
 		 
 		HttpResponse<JsonNode> jsonResponse = Unirest.post(baseURL + "{conceptId}")
 				  .basicAuth("snowowl", "snowowl")
+				  .header("Content-Type", "application/json")
 					.routeParam("conceptId", "000")
 	                .body(updateConcept)
 	                .asJson();
@@ -100,7 +105,7 @@ public class AtcConteptRestServiceTest {
 	}
 	
 	@Test()
-	public void testDelete() throws UnirestException {
+	public void test51Delete() throws UnirestException {
 		HttpResponse<JsonNode> jsonResponse = Unirest.delete(baseURL + "{conceptId}")
 				.routeParam("conceptId", "D01A5")
 				 .basicAuth("snowowl", "snowowl")
@@ -110,7 +115,7 @@ public class AtcConteptRestServiceTest {
 	}
 	
 	@Test()
-	public void testDeleteNotFound() throws UnirestException {
+	public void test52DeleteNotFound() throws UnirestException {
 		HttpResponse<JsonNode> jsonResponse = Unirest.delete(baseURL + "{conceptId}")
 				.routeParam("conceptId", "D01A5")
 				 .basicAuth("snowowl", "snowowl")
