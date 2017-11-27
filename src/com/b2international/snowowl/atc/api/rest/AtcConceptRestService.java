@@ -6,7 +6,6 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -84,7 +83,8 @@ public class AtcConceptRestService{
 			@RequestParam(value="limit", defaultValue="50", required=false)
 			final int limit,
 			
-			@ApiParam(value="The list of sorting fields in order and start with (+/-) as orientation")
+			@ApiParam(value="The list of sorting fields in order and start with (+/-) as orientation"
+					+ "The available sorting parameters: id, iconId, description, parent, released, score, storageKey")
 			@RequestParam(value="sort", required=false)
 			final String sortFilter,
 			
@@ -113,7 +113,7 @@ public class AtcConceptRestService{
 		 if(!StringUtils.isEmpty(sortFilter)) {
 			 
 			  String[] sortStringArray = sortFilter.split(",");
-		       Map<String, Boolean> sortMap = new TreeMap<>();
+			  TreeMap<String, Boolean> sortMap = new TreeMap<>();
 
 		        for (String item : sortStringArray) {
 		            if (item.startsWith("-"))
@@ -125,13 +125,10 @@ public class AtcConceptRestService{
 		        }
 		        
 		        List<SearchResourceRequest.SortField> sortList = new ArrayList<>();
-		        
 		        sortMap.forEach((key, desc) -> {
 		        	sortList.add( new SearchResourceRequest.SortField(key,desc));
 		        });
-		        	
-		       
-			 request = request.sortBy(sortList);
+		        request = request.sortBy(sortList);
 		 }
 		
 		
