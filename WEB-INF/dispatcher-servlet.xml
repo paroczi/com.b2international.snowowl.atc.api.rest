@@ -20,7 +20,10 @@
     <!-- Include a swagger configuration-->
     <bean name="swaggerConfig" class="com.b2international.snowowl.atc.api.rest.SwaggerConfiguration"/>
 
-<mvc:resources mapping="**/swagger-ui.html" location="classpath:/META-INF/resources/"/>
-<mvc:resources mapping="**/webjars/**" location="classpath:/META-INF/resources/webjars/"/> 
+   
+    <context:annotation-config/>
+
+  <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+   <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/> 
 
 </beans>
