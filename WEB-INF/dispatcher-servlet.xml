@@ -16,5 +16,14 @@
  
   <bean name="restService" class="com.b2international.snowowl.atc.api.rest.AtcConceptRestService" />
   <bean name="exceptionMapper" class="com.b2international.snowowl.atc.api.rest.ControllerExceptionMapper" />
+    
+    <!-- Include a swagger configuration-->
+    <bean name="swaggerConfig" class="com.b2international.snowowl.atc.api.rest.SwaggerConfiguration"/>
+
+   
+    <context:annotation-config/>
+
+  <mvc:resources mapping="swagger-ui.html" location="classpath:/META-INF/resources/"/>
+   <mvc:resources mapping="/webjars/**" location="classpath:/META-INF/resources/webjars/"/> 
 
 </beans>

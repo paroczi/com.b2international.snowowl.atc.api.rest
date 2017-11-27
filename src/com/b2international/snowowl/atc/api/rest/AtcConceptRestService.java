@@ -45,7 +45,7 @@ public class AtcConceptRestService{
 	private static final String REPOSITORY_ID = AtcCoreActivator.REPOSITORY_UUID;
 	private static final long COMMIT_TIMEOUT = 120L * 1000L;
 	private IEventBus bus = ApplicationContext.getInstance().getService(IEventBus.class);
-
+	
 	@ApiOperation(
 			value="Retrieve Concepts from a branch", 
 			notes="Returns a list with all/filtered Concepts from a branch."
