@@ -3,8 +3,11 @@ package com.b2international.snowowl.atc.api.rest;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -81,6 +84,10 @@ public class AtcConceptRestService{
 			@RequestParam(value="limit", defaultValue="50", required=false)
 			final int limit,
 			
+			@ApiParam(value="The list of sorting fields in order and start with (+/-) as orientation")
+			@RequestParam(value="sort", required=false)
+			final String sortFilter,
+			
 			@ApiParam(value="Expansion parameters")
 			@RequestParam(value="expand", required=false)
 			final String expand,
@@ -102,6 +109,30 @@ public class AtcConceptRestService{
 			 List<String> parents = Arrays.asList(parentFilter.split(","));
 			 request = request.filterByParents(parents);
 		 }
+		 
+		 if(!StringUtils.isEmpty(sortFilter)) {
+			 
+			  String[] sortStringArray = sortFilter.split(",");
+		       Map<String, Boolean> sortMap = new TreeMap<>();
+
+		        for (String item : sortStringArray) {
+		            if (item.startsWith("-"))
+		                sortMap.put(item.substring(1), false);
+		            else if (item.startsWith("+"))
+		                sortMap.put(item.substring(1), true);
+		            else
+		                sortMap.put(item, true);
+		        }
+		        
+		        List<SearchResourceRequest.SortField> sortList = new ArrayList<>();
+		        
+		        sortMap.forEach((key, desc) -> {
+		        	sortList.add( new SearchResourceRequest.SortField(key,desc));
+		        });
+		        	
+		       
+			 request = request.sortBy(sortList);
+		 }
 		
 		
 		try {
@@ -118,7 +149,6 @@ public class AtcConceptRestService{
 				.filterByDescription(descriptionFilter)
 				.setExpand(expand)
 				.setLocales(extendedLocales)
-				.sortBy(new SearchResourceRequest.SortField("id", true))
 				.build(REPOSITORY_ID, branch)
 				.execute(bus)
 				.getSync());		
