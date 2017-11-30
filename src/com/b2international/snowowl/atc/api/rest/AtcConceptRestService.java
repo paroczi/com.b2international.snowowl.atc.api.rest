@@ -1,20 +1,34 @@
 package com.b2international.snowowl.atc.api.rest;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.b2international.commons.http.AcceptHeader;
 import com.b2international.commons.http.ExtendedLocale;
+import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
+import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
+import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
+import com.b2international.snowowl.atc.api.rest.domain.RestApiError;
 import com.b2international.snowowl.atc.core.AtcCoreActivator;
 import com.b2international.snowowl.atc.core.domain.AtcConcept;
 import com.b2international.snowowl.atc.core.domain.AtcConcepts;
@@ -31,11 +45,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import com.b2international.snowowl.atc.api.rest.domain.ChangeRequest;
-import com.b2international.snowowl.atc.api.rest.domain.RestApiError;
-import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestInput;
-import com.b2international.snowowl.atc.api.rest.domain.AtcConceptRestUpdate;
 
 
 
@@ -126,7 +135,7 @@ public class AtcConceptRestService{
 		 if(!StringUtils.isEmpty(sortFilter)) {
 			 
 			  String[] sortStringArray = sortFilter.split(",");
-			  TreeMap<String, Boolean> sortMap = new TreeMap<>();
+			  Map<String, Boolean> sortMap = new TreeMap<>();
 
 		        for (String item : sortStringArray) {
 		            if (item.startsWith("-"))
